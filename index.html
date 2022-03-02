@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+            crossorigin="anonymous"
+        />
+
+        <title>Hello, world!</title>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+
+    <style lang="css">
+        .bold {
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            margin-bottom: 3px;
+        }
+    </style>
+
+    <body>
+        <div class="container" style="margin-top: 7rem">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="" class="bold">Input raw data</label>
+                        <textarea name="raw" cols="30" rows="17" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="bold">Type input data</label>
+                        <select name="type" class="form-control" onchange="typeInpData()">
+                            <option value="1" selected>KEY: VALUE</option>
+                            <option value="2">KEY:VALUE</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <button class="btn btn-success" id="convert">Convert to JSON</button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="" class="bold">Result</label>
+                        <textarea name="result" cols="30" rows="20" class="form-control" readonly></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="copyResult()">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(function() {
+
+                typeInpData()
+
+                $("#convert").on('click', function() {
+                    var raw = $("textarea[name='raw']").val()
+                    if(!raw) {
+                        Swal.fire('ERROR', 'Input raw data must not be empty', 'error')
+                        return
+                    }
+
+                    $("#convert").attr('disabled', 'disabled').text('Loading...')
+                    $("select[name='type']").attr('disabled', 'disabled')
+
+                    var obj = {}
+
+                    $.each(raw.split('\n'), function(i, value) {
+                        switch ($("select[name='type']").val()) {
+                            case '1':
+                                var key = value.split(': ')[0]
+                                var value = value.split(': ')[1]
+                                break;
+                            
+                            case '2':
+                                var key = value.split(':')[0]
+                                var value = value.split(':')[1]
+                                break;
+                            default:
+                                var key = 'Type not found'
+                                var value = 'Type not found'
+                                break;
+                        }
+
+                        obj[key] = value
+                    })
+
+                    $("textarea[name='result']").val(JSON.stringify(obj, null, 4))                    
+
+                    $("select[name='type']").removeAttr('disabled')
+                    $("#convert").removeAttr('disabled').text('Convert to JSON')
+                })
+            })
+
+            function typeInpData() {
+                switch ($("select[name='type']").val()) {
+                    case '1':
+                        $("textarea[name='raw']").removeAttr('placeholder').attr('placeholder', 'KEY1: VALUE1\nKEY2: VALUE2\nKEY3: VALUE3')
+                        break;
+                    
+                    case '2':
+                        $("textarea[name='raw']").removeAttr('placeholder').attr('placeholder', 'KEY1:VALUE1\nKEY2:VALUE2\nKEY3:VALUE3')
+                        break;
+                    default:
+                        Swal.fire('ERROR', 'Type not found', 'error')
+                        break;
+                }
+            }
+
+            function copyResult() {
+                $("textarea[name='result']").select();
+                document.execCommand('copy');
+                Swal.fire('SUCCESS', 'Result copied to clipboard', 'success')
+            }
+        </script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>
